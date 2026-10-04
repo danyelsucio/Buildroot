@@ -9,10 +9,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Instala toolchain
-        run: sudo apt update && sudo apt install -y build-essential git bc bison flex libssl-dev cpio
+      - name: Instala dependencias
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential git bc bison flex libssl-dev libelf-dev cpio unzip rsync
 
-      - name: Compila
+      - name: Compila Buildroot
         run: |
           git clone https://github.com/buildroot/buildroot.git
           cp config-cubie-a7a-puro-c buildroot/.config
@@ -20,13 +22,11 @@ jobs:
           make olddefconfig
           make -j$(nproc)
 
-      - name: Verifica que sea puro C
-        run: |
-          ls -lh buildroot/output/images/
-          echo "---"
-          file buildroot/output/images/*
+      - name: Lista imagenes
+        run: ls -lh buildroot/output/images/
 
-      - uses: actions/upload-artifact@v4
+      - name: Sube artifact
+        uses: actions/upload-artifact@v4
         with:
           name: cubie-a7a-C-ASM-64MB
           path: buildroot/output/images/
